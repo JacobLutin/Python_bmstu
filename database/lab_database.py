@@ -15,14 +15,14 @@ def getRow(row):
     return row
 
 def setAverage(row):
-    if len(row) == 6:
+    if len(row) > 3:
         k = 0
         average = 0
-        for i in range(3, len(row)):
+        for i in range(3, len(row)-1):
             average += row[i]
             k += 1
-        average = average / 3
-        row.append(average)
+        average = average / k
+        row[-1] = average
     return row
 
 
@@ -32,13 +32,13 @@ def databaseConnect(name):
     f = open(name, 'r', encoding='utf8')
 
     global database
-    global databaseTitle
+    global databaseHeader
 
     i = 0
 
     for row in f:
         if i == 0:
-            databaseTitle = row.split()
+            databaseHeader = row.split()
         elif len(row) > 0:
             row = getRow(row)
             row = setAverage(row)
@@ -55,13 +55,88 @@ def databaseSave():
     name = db + '.txt'
     f = open(name, 'w', encoding='utf8')
 
-    titles = ' '.join(databaseTitle)
-    titles += '\n'
-    f.write(titles)
+    headers = ' '.join(databaseHeader)
+    headers += '\n'
+    f.write(headers)
     for record in database:
         record = ' '.join(map(str, record))
         record += '\n'
         f.write(record)
+
+def databaseSort():
+
+    global databaseHeader
+    
+    print("  Выберите поле для поиска")
+
+    i = 1
+    for field in databaseHeader:
+        line = "   " + str(i) + " - " + field
+        print(line)
+        i += 1
+
+    print("   0", "- Назад")
+    inp = int(input(" > "))
+
+    result = False
+
+    if inp != 0:
+        inp -= 1
+        if inp < 2:
+            result = databaseSortByName(inp)
+        elif inp >= 2:
+            result = databaseSortByValue(inp)
+
+
+    if result:
+
+        databaseSave()
+
+        print(_ln)
+        print("Записи успешно отсортированы")
+
+def databaseSortByName(headerId=0, order=True):
+
+    global database
+
+    if headerId > 1:
+        return False
+
+    for i in range(len(database)):
+        for j in range(len(database)-1):
+            firstRecord = getRecordLetter(j, headerId)
+            secondRecord = getRecordLetter(j+1, headerId)
+            if ord(firstRecord.upper()) > ord(secondRecord.upper()):
+                database[j], database[j+1] = database[j+1], database[j]
+
+    return True
+
+def databaseSortByValue(headerId=0, order=True):
+
+    global database
+
+    if headerId < 2:
+        return False
+
+    for i in range(len(database)):
+        for j in range(len(database)-1):
+            firstRecordValue = getRecordValue(j, headerId)
+            secondRecordValue = getRecordValue(j+1, headerId)
+            if firstRecordValue < secondRecordValue:
+                database[j], database[j+1] = database[j+1], database[j]
+
+    return True
+
+
+
+
+def getRecordLetter(i, headerId):
+    global database
+    return database[i][headerId][0]
+
+def getRecordValue(i, headerId):
+    global database
+    return database[i][headerId]
 
 
 def databaseCreate():
@@ -75,11 +150,11 @@ def databaseCreate():
 def printRecords(records = ''):
 
     print(_ln)
-    title = '|'
+    header = '|'
 
-    for record in databaseTitle:
-        title += record.center(10, ' ') + '|'
-    print(title)
+    for record in databaseHeader:
+        header += record.center(10, ' ') + '|'
+    print(header)
 
     if records == '':
         for record in database:
@@ -125,11 +200,11 @@ def printRecords(records = ''):
 def addRecord():
 
     global database
-    title = databaseTitle.copy()
-    title.pop()
+    header = databaseHeader.copy()
+    header.pop()
     record = []
     i = 0
-    for row in title:
+    for row in header:
         st = "Введите поле \"" + row + "\": "
         inp = input(st)
         if i > 1:
@@ -154,7 +229,7 @@ def searchGet(remove = False):
         print("  Выберите поле для поиска")
 
     i = 1
-    for field in databaseTitle:
+    for field in databaseHeader:
         line = "   " + str(i) + " - " + field
         print(line)
         i += 1
@@ -247,10 +322,11 @@ def databaseMenu():
         print(_ln)
         print("  Меню")
         print("   1 - Создать новую базу данных")
-        print("   2 - Вывести записи")
+        print("   2 - Вывести все записи")
         print("   3 - Добавить запись")
-        print("   4 - Поиск по полю")
-        print("   5 - Удаление по полю")
+        print("   4 - Сортировка по полю")
+        print("   5 - Поиск по полю")
+        print("   6 - Удаление по полю")
         print("   0 - Выход")
         inp = input(" > ")
         print(_ln)
@@ -260,10 +336,10 @@ def databaseMenu():
 def command(x):
     x = int(x)
     return [exitProgram, databaseCreate, printRecords,
-            addRecord, searchRecord, removeField, ][x]
+            addRecord, databaseSort, searchRecord, removeField, databaseSortByName][x]
 
 db = 'db'
-databaseTitle = ''
+databaseHeader = ''
 searchFrom = []
 database = []
 databaseConnect(db)
