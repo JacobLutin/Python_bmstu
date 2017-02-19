@@ -28,5 +28,5 @@ def main(test=False):
     menu(functions, test)
 
 
-main()
+main(test_area1)
 

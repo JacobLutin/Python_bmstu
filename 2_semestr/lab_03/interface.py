@@ -49,6 +49,9 @@ def menu(functions, test=False):
         a, b, h, eps, n = getParams()
     else:
         choice, a, b, h, eps, n = test()
+        if choice == 4:
+            print("ok")
+            points = [1, 2, 3]
 
     f = functions[0]
     g = functions[1]

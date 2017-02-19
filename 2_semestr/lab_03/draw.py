@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+f_label = '$x^2-4$'
+g_label = '$cos(x)$'
+
 def drawPlot(a, b, functions, roots, exes, infp, points=[]):
 
     f = functions[0]
@@ -16,8 +19,8 @@ def drawPlot(a, b, functions, roots, exes, infp, points=[]):
         gx = [ g(i) for i in x ]
         froots = [ f(i) for i in roots ]
 
-        plt.plot(x, fx, 'k', label='f(x)')
-        plt.plot(x, gx, 'r', label='g(x)')
+        plt.plot(x, fx, 'k', label=f_label)
+        plt.plot(x, gx, 'r', label=g_label)
         plt.plot(roots, froots, 'ro', label='Точки пересечения')
 
         # first = x.index(roots[0])
@@ -46,7 +49,7 @@ def drawPlot(a, b, functions, roots, exes, infp, points=[]):
 
         fx = [ f(i) for i in x ]
 
-        plt.plot(x, fx, 'k', label='f(x)')
+        plt.plot(x, fx, 'k', label=f_label)
 
 
     if 'roots' in points:
